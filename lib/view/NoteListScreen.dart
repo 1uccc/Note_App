@@ -27,7 +27,11 @@ class _NoteListScreenState extends State<NoteListScreen> {
   @override
   void initState() {
     super.initState();
+<<<<<<<< HEAD:lib/view/NoteListScreen.dart
     _loadNotes();
+========
+    _loadNotes();// goi API de lay du lieu
+>>>>>>>> 2fe84d5 (first):noteapp/lib/view/NoteListScreen.dart
 
   }
 
@@ -35,12 +39,16 @@ class _NoteListScreenState extends State<NoteListScreen> {
     List<Note> notes = await NoteAPIService.instance.getAllNotes();
     setState(() {
       _notes = notes;
-      _filterAndSortNotes();
+      _filterAndSortNotes(); //loc va sap xep sau khi lay ghi chu
     });
   }
 
   void _filterAndSortNotes() {
+<<<<<<<< HEAD:lib/view/NoteListScreen.dart
     _filteredNotes = List.from(_notes);
+========
+    _filteredNotes = List.from(_notes); // copy danh sach goc
+>>>>>>>> 2fe84d5 (first):noteapp/lib/view/NoteListScreen.dart
 
     if (_selectedPriority != -1 && _selectedPriority != null) {
       _filteredNotes = _filteredNotes
@@ -63,21 +71,25 @@ class _NoteListScreenState extends State<NoteListScreen> {
     }
   }
 
-  void _toggleView() {
+  void _toggleView() { // doi giua danh sach - luoi
     setState(() {
       _isGridView = !_isGridView;
     });
   }
 
-  void _toggleSort() {
+  void _toggleSort() { // doi giua ngay - uu tien
     setState(() {
       _sortByPriority = !_sortByPriority;
       _filterAndSortNotes();
     });
   }
 
+<<<<<<<< HEAD:lib/view/NoteListScreen.dart
   Future<void> _handleLogout() async {
     // Xóa dữ liệu người dùng
+========
+  Future<void> _handleLogout() async { // xoa thong tin dang nhap
+>>>>>>>> 2fe84d5 (first):noteapp/lib/view/NoteListScreen.dart
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }
