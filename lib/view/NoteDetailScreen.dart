@@ -32,7 +32,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     );
 
     if (result == true) {
-      // Nếu người dùng cập nhật xong, lấy lại ghi chú mới nhất từ DB
       final updatedNote = await NoteAPIService.instance.getNoteById(_note.id!);
       if (updatedNote != null) {
         setState(() {
@@ -89,6 +88,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                     Divider(),
                     _buildDetailRow('Màu sắc', _note.color ?? 'Không có'),
                     Divider(),
+                    _buildDetailRow('ID người tạo', _note.idAccount.toString()),
                   ],
                 ),
               ),

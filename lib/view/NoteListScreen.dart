@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../api/NoteAPIService.dart';
 import '../model/Note.dart';
 import '../view/NoteListItem.dart';
 import '../view/EditNoteScreen.dart';
 import '../view/AddNoteScreen.dart';
+import '../view/LoginScreen.dart';
 
 class NoteListScreen extends StatefulWidget {
+  final Function? onLogout;
+
+  NoteListScreen({this.onLogout});
+
   @override
   _NoteListScreenState createState() => _NoteListScreenState();
 }
@@ -22,6 +28,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
   void initState() {
     super.initState();
     _loadNotes();
+
   }
 
   Future<void> _loadNotes() async {
@@ -33,29 +40,27 @@ class _NoteListScreenState extends State<NoteListScreen> {
   }
 
   void _filterAndSortNotes() {
-    setState(() {
-      _filteredNotes = List.from(_notes);
+    _filteredNotes = List.from(_notes);
 
-      if (_selectedPriority != -1 && _selectedPriority != null) {
-        _filteredNotes = _filteredNotes
-            .where((note) => note.priority == _selectedPriority)
-            .toList();
-      }
+    if (_selectedPriority != -1 && _selectedPriority != null) {
+      _filteredNotes = _filteredNotes
+          .where((note) => note.priority == _selectedPriority)
+          .toList();
+    }
 
-      if (_searchText.isNotEmpty) {
-        _filteredNotes = _filteredNotes
-            .where((note) =>
-        note.title.toLowerCase().contains(_searchText.toLowerCase()) ||
-            note.content.toLowerCase().contains(_searchText.toLowerCase()))
-            .toList();
-      }
+    if (_searchText.isNotEmpty) {
+      _filteredNotes = _filteredNotes
+          .where((note) =>
+      note.title.toLowerCase().contains(_searchText.toLowerCase()) ||
+          note.content.toLowerCase().contains(_searchText.toLowerCase()))
+          .toList();
+    }
 
-      if (_sortByPriority) {
-        _filteredNotes.sort((a, b) => a.priority.compareTo(b.priority));
-      } else {
-        _filteredNotes.sort((a, b) => b.createAt.compareTo(a.createAt));
-      }
-    });
+    if (_sortByPriority) {
+      _filteredNotes.sort((a, b) => a.priority.compareTo(b.priority));
+    } else {
+      _filteredNotes.sort((a, b) => b.createAt.compareTo(a.createAt));
+    }
   }
 
   void _toggleView() {
@@ -69,6 +74,37 @@ class _NoteListScreenState extends State<NoteListScreen> {
       _sortByPriority = !_sortByPriority;
       _filterAndSortNotes();
     });
+  }
+
+  Future<void> _handleLogout() async {
+    // Xóa dữ liệu người dùng
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
+
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Xác nhận đăng xuất'),
+        content: Text('Bạn có chắc chắn muốn đăng xuất?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              if (widget.onLogout != null) {
+                await widget.onLogout!();
+              }
+            },
+            child: Text('Đăng xuất', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -109,10 +145,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
             ],
             icon: const Icon(Icons.filter_alt),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadNotes,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadNotes),
           IconButton(
             icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
             onPressed: _toggleView,
@@ -120,6 +153,10 @@ class _NoteListScreenState extends State<NoteListScreen> {
           IconButton(
             icon: Icon(_sortByPriority ? Icons.sort_by_alpha : Icons.calendar_today),
             onPressed: _toggleSort,
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _showLogoutDialog,
           ),
         ],
       ),
@@ -134,73 +171,67 @@ class _NoteListScreenState extends State<NoteListScreen> {
         itemCount: _filteredNotes.length,
         itemBuilder: (context, index) {
           final note = _filteredNotes[index];
-          return Container(
-            margin: const EdgeInsets.all(0),
-            child: NoteListItem(
-              note: note,
-              onDeleted: () async {
-                await NoteAPIService.instance.deleteNote(note.id!);
+          return NoteListItem(
+            note: note,
+            onDeleted: () async {
+              await NoteAPIService.instance.deleteNote(note.id!);
+              _loadNotes();
+            },
+            onEdit: () async {
+              final updatedNote = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditNoteScreen(note: note),
+                ),
+              );
+              if (updatedNote == true) {
                 _loadNotes();
-              },
-              onEdit: () async {
-                final updatedNote = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditNoteScreen(note: note),
-                  ),
-                );
-                if (updatedNote == true) {
-                  _loadNotes();
-                }
-              },
-            ),
+              }
+            },
           );
         },
       )
-      //Xuat dang List
           : ListView.builder(
         itemCount: _filteredNotes.length,
         itemBuilder: (context, index) {
           final note = _filteredNotes[index];
-          return Container(
-            margin: const EdgeInsets.symmetric(vertical: 0),
-            child: NoteListItem(
-              note: note,
-              onDeleted: () async {
-                await NoteAPIService.instance.deleteNote(note.id!);
+          return NoteListItem(
+            note: note,
+            onDeleted: () async {
+              await NoteAPIService.instance.deleteNote(note.id!);
+              _loadNotes();
+            },
+            onEdit: () async {
+              final updatedNote = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditNoteScreen(note: note),
+                ),
+              );
+              if (updatedNote == true) {
                 _loadNotes();
-              },
-              onEdit: () async {
-                final updatedNote = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditNoteScreen(note: note),
-                  ),
-                );
-                if (updatedNote == true) {
-                  _loadNotes();
-                }
-              },
-            ),
+              }
+            },
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          final created = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddnoteScreen()),
-          );
-          if (created == true) {
-            _loadNotes();
-          }
-        },
-      ),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () async {
+            final created = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddnoteScreen()),
+            );
+            if (created == true) {
+              _loadNotes();
+            }
+          },
+        ),
     );
   }
 }
-//Tim kiem
+
+// Tìm kiếm
 class NoteSearchDelegate extends SearchDelegate {
   final List<Note> notes;
   final ValueChanged<String> onSearchTextChanged;
@@ -224,9 +255,7 @@ class NoteSearchDelegate extends SearchDelegate {
   Widget buildLeading(BuildContext context) {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
+      onPressed: () => close(context, null),
     );
   }
 

@@ -86,6 +86,7 @@ class _NoteFormState extends State<NoteForm> {
         modifiedAt: DateTime.now(),
         tags: _tags,
         color: _selectedColor.value.toString(),
+        idAccount: widget.note?.idAccount
       );
       widget.onSave(note);
     }

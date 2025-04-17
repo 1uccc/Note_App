@@ -131,7 +131,6 @@ class NoteListItem extends StatelessWidget {
       ),
     );
   }
-  // Ham chuyen tiep sang NoteDetailScreen
   void _navigateToNoteDetailScreen(BuildContext context) {
     Navigator.push(
       context,
