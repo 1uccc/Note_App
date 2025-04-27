@@ -6,7 +6,7 @@ class AccountAPIService {
   static final AccountAPIService _instance = AccountAPIService._internal();
   factory AccountAPIService() => _instance;
 
-  final String baseUrl = 'http://localhost:3000/api/accounts';
+  final String baseUrl = 'http://10.0.2.2:3000/api/accounts';
   final Map<String, String> headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -36,20 +36,34 @@ class AccountAPIService {
     }
   }
 
-  // Đăng ký
-  Future<Account> register(Account account) async {
-    final response = await http.post(
-      Uri.parse(baseUrl),
-      headers: headers,
-      body: account.toJson(),
-    );
+  // Đăng kí tài khoản
+  Future<void> registerAccount(String username, String password) async {
+    final now = DateTime.now().toIso8601String();
+    final body = jsonEncode({
+      'userId': DateTime.now().millisecondsSinceEpoch,
+      'username': username,
+      'password': password,
+      'status': 'active',
+      'lastLogin': now,
+      'createdAt': now,
+    });
 
-    if (response.statusCode == 201) {
-      return Account.fromMap(json.decode(response.body));
-    } else {
-      throw Exception('Registration failed: ${response.body}');
+    try {
+      final response = await http.post(
+        Uri.parse(baseUrl),
+        headers: headers,
+        body: body,
+      );
+
+      if (response.statusCode != 201) {
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'Đăng ký thất bại');
+      }
+    } catch (e) {
+      throw Exception('Lỗi khi đăng ký: $e');
     }
   }
+
 
   // Lấy thông tin tài khoản
   Future<Account?> getAccount(String id) async {

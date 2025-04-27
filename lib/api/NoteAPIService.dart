@@ -5,7 +5,7 @@ import '../model/Note.dart';
 
 class NoteAPIService {
   static final NoteAPIService instance = NoteAPIService._init();
-  final String baseUrl = 'http://localhost:3000/api/notes'; // 10.0.2.2/localhost
+  final String baseUrl = 'http://10.0.2.2:3000/api/notes'; // 10.0.2.2/localhost
 
   NoteAPIService._init();
 

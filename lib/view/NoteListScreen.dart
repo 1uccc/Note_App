@@ -27,28 +27,19 @@ class _NoteListScreenState extends State<NoteListScreen> {
   @override
   void initState() {
     super.initState();
-<<<<<<<< HEAD:lib/view/NoteListScreen.dart
     _loadNotes();
-========
-    _loadNotes();// goi API de lay du lieu
->>>>>>>> 2fe84d5 (first):noteapp/lib/view/NoteListScreen.dart
-
   }
 
   Future<void> _loadNotes() async {
     List<Note> notes = await NoteAPIService.instance.getAllNotes();
     setState(() {
       _notes = notes;
-      _filterAndSortNotes(); //loc va sap xep sau khi lay ghi chu
+      _filterAndSortNotes(); // Lọc và sắp xếp sau khi lấy ghi chú
     });
   }
 
   void _filterAndSortNotes() {
-<<<<<<<< HEAD:lib/view/NoteListScreen.dart
-    _filteredNotes = List.from(_notes);
-========
-    _filteredNotes = List.from(_notes); // copy danh sach goc
->>>>>>>> 2fe84d5 (first):noteapp/lib/view/NoteListScreen.dart
+    _filteredNotes = List.from(_notes); // Copy danh sách gốc
 
     if (_selectedPriority != -1 && _selectedPriority != null) {
       _filteredNotes = _filteredNotes
@@ -71,27 +62,27 @@ class _NoteListScreenState extends State<NoteListScreen> {
     }
   }
 
-  void _toggleView() { // doi giua danh sach - luoi
+  void _toggleView() { // Đổi giữa danh sách - lưới
     setState(() {
       _isGridView = !_isGridView;
     });
   }
 
-  void _toggleSort() { // doi giua ngay - uu tien
+  void _toggleSort() { // Đổi giữa ngày - ưu tiên
     setState(() {
       _sortByPriority = !_sortByPriority;
       _filterAndSortNotes();
     });
   }
 
-<<<<<<<< HEAD:lib/view/NoteListScreen.dart
   Future<void> _handleLogout() async {
-    // Xóa dữ liệu người dùng
-========
-  Future<void> _handleLogout() async { // xoa thong tin dang nhap
->>>>>>>> 2fe84d5 (first):noteapp/lib/view/NoteListScreen.dart
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false,
+    );
   }
 
   void _showLogoutDialog() {
@@ -107,10 +98,8 @@ class _NoteListScreenState extends State<NoteListScreen> {
           ),
           TextButton(
             onPressed: () async {
-              Navigator.of(ctx).pop();
-              if (widget.onLogout != null) {
-                await widget.onLogout!();
-              }
+              Navigator.of(ctx).pop(); // Đóng hộp thoại
+              await _handleLogout(); // Thực hiện logout và điều hướng
             },
             child: Text('Đăng xuất', style: TextStyle(color: Colors.red)),
           ),
@@ -227,18 +216,18 @@ class _NoteListScreenState extends State<NoteListScreen> {
           );
         },
       ),
-        floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () async {
-            final created = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddnoteScreen()),
-            );
-            if (created == true) {
-              _loadNotes();
-            }
-          },
-        ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          final created = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddnoteScreen()),
+          );
+          if (created == true) {
+            _loadNotes();
+          }
+        },
+      ),
     );
   }
 }

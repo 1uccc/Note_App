@@ -62,8 +62,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _saveLoginData(Account account) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('accountId', account.userId.toString()); // Lưu userId dưới dạng String
-    await prefs.setInt('userId', account.userId); // Vẫn lưu userId (có thể dùng cho mục đích khác)
+    await prefs.setString('accountId', account.userId.toString());
+    await prefs.setInt('userId', account.userId);
     await prefs.setString('username', account.username);
     await prefs.setBool('isLoggedIn', true);
   }
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.account_circle, size: 100, color: Colors.blue),
+              Image.asset('assets/images/meo.png', height: 100),
               const SizedBox(height: 40),
               TextFormField(
                 controller: _usernameController,

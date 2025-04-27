@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../api/AccountAPIService.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,42 +18,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> registerAccount() async {
     setState(() => isLoading = true);
 
-    final url = Uri.parse('http://localhost:3000/api/accounts');
-    final now = DateTime.now().toIso8601String();
-
-    final body = jsonEncode({
-      'userId': DateTime.now().millisecondsSinceEpoch,
-      'username': username,
-      'password': password,
-      'status': 'active',
-      'lastLogin': now,
-      'createdAt': now,
-    });
-
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: body,
-      );
+      await AccountAPIService().registerAccount(username, password);
 
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tạo tài khoản thành công!')),
-        );
-        Navigator.pop(context);
-      } else {
-
-        print('Phản hồi từ server: ${response.body}');
-        final error = jsonDecode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${error['message']}')),
-        );
-      }
-    } catch (e) {
-      print('Lỗi chi tiết: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi kết nối: $e')),
+        const SnackBar(content: Text('Tạo tài khoản thành công!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      print('Lỗi đăng ký: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     }
 
